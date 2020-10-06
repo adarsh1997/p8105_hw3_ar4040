@@ -1,0 +1,213 @@
+---
+title: "Homework 1"
+author: Adarsh Ramakrishnan
+output: github_document
+---
+
+This is my homework 1 solution:
+
+
+Loading tidyverse library:
+
+```{r libraries}
+library(tidyverse)
+library(readxl)
+```
+
+
+## Problem 1
+
+Read the trash wheel collection dataset
+
+```{r}
+trashwheel_df = read_xlsx("./data/trash_wheel_collection.xlsx", 
+  sheet = "Mr. Trash Wheel",
+  range = cell_cols("A:N")) %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>%
+  mutate(
+    sports_balls = round(sports_balls), 
+    sports_balls = as.integer(sports_balls)
+  )
+```
+
+
+Read the precipitation dataset
+
+```{r}
+precip_df_2018 = read_xlsx("./data/trash_wheel_collection.xlsx", 
+  sheet = "2018 Precipitation",
+  skip = 1)%>%
+  janitor::clean_names() %>%
+  drop_na(month) %>%
+  mutate(year = 2018) %>%
+  relocate(year)
+
+precip_df_2017 = read_xlsx("./data/trash_wheel_collection.xlsx", 
+  sheet = "2017 Precipitation",
+  skip = 1)%>%
+  janitor::clean_names() %>%
+  drop_na(month) %>%
+  mutate(year = 2017) %>%
+  relocate(year)
+```
+
+Combine annual precipitation
+
+```{r}
+month_df = tibble(month = 1:12, month_name = month.name)
+precip_df = bind_rows(precip_df_2018,precip_df_2017) 
+left_join(precip_df, month_df, by = "month")
+
+
+```
+
+The dataset contains information from the Mr.Trashwheel trash collector in Baltimore. As trash enters the inner harbor, the trashwheel collects trash and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific kinds of trash. There are a total of `r nrow(trashwheel_df)`  rows in our final dataset. Additional data sheets include month precipitation data
+
+
+## Problem 2
+
+Read the NYC transit data
+
+```{r}
+transit_df = read.csv("./data/nyc_transit.csv")%>%
+  janitor::clean_names()%>%
+  select(line, station_name, station_latitude, station_longitude, route1,route2,
+         route3,route4,route5,route6,route7,route8,route9,route10,route11, entry,
+         vending, entrance_type, ada)%>%
+  mutate(entry = recode(entry,"YES"= TRUE,"NO"=FALSE))
+```
+
+The transit_df dataframe displays the different stations and trains that pass through the station along with other info about the trains and stations. 
+
+The variables in the dataset of interest are the line, station name, routes, ada compliance, entry, and vending.
+
+In the cleaning process, we cleaned up the variable names to comply to best practices using the janitor package, selected the rows of interest and recoded the character variables for entry into booleans
+
+The dataset is not tidy since the route names and numbers are combined together resulting an uncessarily large number of rows. The variables should be collapsed and pivoted to make it tidier. 
+
+
+Count the number of distinct stations
+
+```{r}
+
+distinct(transit_df,line,station_name)%>%count()
+```
+There are 465 distinct stations
+
+Count the number of distinct stations that are ADA compliant
+
+```{r}
+filter(transit_df, ada == TRUE)%>%distinct(line,station_name)%>%count()
+```
+There are 73 distinct stations
+
+Now to count the proportion of station entrances/exits without vending that allow entry
+
+```{r}
+
+Numerator = filter(transit_df, vending == "NO" & entry == TRUE)%>%distinct(line,station_name)%>%count()
+Denomenator = filter(transit_df, vending == "NO")%>%distinct(line,station_name)%>%count()
+proportion = Numerator/Denomenator
+```
+
+Hence, the proportion of station entrances/exits without vending that allow entry is 0.43
+
+
+Now let's tidy up the route variables and melt the columns into rows
+```{r}
+tidy_transit_df = transit_df %>% 
+  mutate_at(vars(route8:route11), as.character)%>%
+  pivot_longer(
+    route1:route11,
+    names_to = "route",
+    values_to = "route_name")%>% drop_na(route)
+
+filter(tidy_transit_df, route_name == "A")%>%
+  distinct(line, station_name)%>%
+  count()
+
+filter(tidy_transit_df, route_name == "A" & ada == TRUE)%>%
+  distinct(line, station_name)%>%
+  count()
+
+    
+  
+```
+Hence, there are 60 distinct stations that serve the A train and of those 60, 17 are ADA compliant
+
+#Problem 3
+
+Read the poll month data
+
+```{r}
+
+
+polmonth_df = read.csv("./data/pols-month.csv")%>%
+  janitor::clean_names()%>%
+  separate(mon, into = c("year","month","day"))%>%
+  mutate(month = month.name[as.factor(month)]) %>%
+  mutate(president = case_when(prez_dem == 1 ~ "dem", prez_gop == 1 ~"gop"))%>%
+  mutate(year = as.numeric(year))%>%
+  select(-day, -prez_dem, -prez_gop)%>%
+  arrange(month)%>% arrange(year)%>%
+  relocate(year, month)
+
+
+```
+
+Read the snp data
+
+```{r}
+snp_df = read.csv("./data/snp.csv")%>%
+  janitor::clean_names()%>%
+  separate(date, into = c("month","day", "year"))%>%
+  mutate(month = month.name[as.factor(month)])%>%
+  mutate(year = as.numeric(year))%>%
+  arrange(month)%>% arrange(year)%>%
+  relocate(year, month)
+```
+
+Read the unemployment data
+
+```{r}
+unemploy_df = read.csv("./data/unemployment.csv")%>%
+  janitor::clean_names()%>%
+  pivot_longer(
+  jan:dec,
+  names_to = "month",
+  values_to = "unemployment rate")%>%
+  mutate(year = as.numeric(year))%>%
+  arrange(month)%>% arrange(year)%>%
+  relocate(year, month)
+```
+
+Merge the datasets 
+
+```{r}
+prefinal_df = left_join(polmonth_df,snp_df, by = c("year","month"))
+final_df = left_join(prefinal_df,unemploy_df, by = c("year","month"))
+```
+
+Describing the datasets
+
+The pols-month dataset has 9 variables about the politicians who are democratic or republican
+
+The snp contains 2 variables about Standard & Poors stock market index which is representative of the stock market as a whole
+
+The unemployment dataset contains 13 variables and describes the percentage of unemployment during various months.
+
+The merged dataset has 12 variables and `r ncol(final_df` observations. It can be used to track the unemployment percentage based on the political party candidates in power and also to describe the state of the stick market using SNP index when those candidates are in power. Some key variables are month, year,president, close, and unemployment rate.
+
+
+```{r}
+max_years = final_df$year
+max(max_years)
+
+min_years = final_df$year
+min(min_years)
+```
+
+The years range from 1947 to 2015
+
+max(final_df$year)
