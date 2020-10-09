@@ -70,6 +70,43 @@ instacart %>%
 
 ##Problem 2
 
+Import and clean the accel_data csv - 
+```{r}
+accel_df = read_csv("./data/accel_data.csv")%>% 
+janitor::clean_names()%>%
+pivot_longer(
+    activity_1:activity_1440,
+    names_to = "activity_number",
+    values_to = "activity_count")%>%
+mutate(
+    weekday_weekend = case_when(
+      day == "Saturday" ~ "weekend",
+      day == "Sunday" ~ "weekend",
+      day == "Monday" ~ "weekday",
+      day == "Tuesday" ~ "weekday",
+      day == "Wednesday" ~ "weekday",
+      day == "Thursday" ~ "weekday",
+      day == "Friday" ~ "weekday",
+      TRUE      ~ ""
+  ))
+```
+
+Creating a table that aggregated activity count for each of the days 
+
+```{r}
+accel_df%>%
+group_by(day_id)%>%
+summarize(total_activity_count = sum(activity_count, na.rm = FALSE))
+  
+```
+Making a plot of 24 hour activity time courses for the different days.
+
+```{r}
+accel_df%>%
+group_by(day_id)%>%
+ggplot(aes(x = ))
+```
+
 data wrangling - 
 1) go from wide format to long format - activity count, minute of the day
 2)straightforward
@@ -93,6 +130,8 @@ for the table, day of week would by default be in alphabetical order. May need t
 for tidying, is minute of day in numeric format or some other format? Make sure it is numeric. Later on, the plots need to show what you want to show and be in right order
 
 #Problem 3
+
+
 point 1
 - seperate year, month, and day. No need to convert month to descriptor 
 - snowfall units should be converted to good units. degrees C perhaps
