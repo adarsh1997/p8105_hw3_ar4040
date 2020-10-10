@@ -104,8 +104,9 @@ Making a plot of 24 hour activity time courses for the different days.
 ```{r}
 accel_df%>%
 group_by(day_id)%>%
-ggplot(aes(x = minute_of_day, y = activity_count, color = day_id))+
-geom_line()
+ggplot(aes(x = minute_of_day, y = activity_count, group = day_id, color = day))+
+geom_line(alpha = 0.5)+
+geom_smooth(aes(group = day))
 ```
 
 data wrangling - 
@@ -162,6 +163,21 @@ ny_noaa_df%>%
 ```
 
 From the histogram above, it is clear that the most common value by far is 0. This is because it makes sense that it only snows a few days in a year and hence there would be no snowfall recorded most of the year.
+
+Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+
+```{r}
+ny_noaa_df%>%
+na.omit()%>%
+filter(month %in% c(6,7))%>%
+group_by(id,year,month)%>%
+summarize(avg_tmax = mean(tmax))%>%
+ggplot(  aes(x = year, y = avg_tmax) ) +
+geom_point()+
+geom_smooth()+
+facet_grid(. ~  month)
+      
+```
 
 point 1
 - seperate year, month, and day. No need to convert month to descriptor 
