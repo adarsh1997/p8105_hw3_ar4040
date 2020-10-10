@@ -161,7 +161,7 @@ ny_noaa_df%>%
   geom_histogram(na.rm = TRUE)
 ```
 
-From the histogram above, it is clear that the most common value by far is 0. This is because it makes sense that it only snows a few days in a year and hence there would be no snowfall recorded most of the year. 
+From the histogram above, it is clear that the most common value by far is 0. This is because it makes sense that it only snows a few days in a year and hence there would be no snowfall recorded most of the year.
 
 point 1
 - seperate year, month, and day. No need to convert month to descriptor 
@@ -175,7 +175,7 @@ point 2
 - filter Jan and July (doesn't matter which order)
 - use count to look at common snowball values
 - plot has lot of lines stacked up on each other.
-- Use facet to get two panel plot 
+- Use facet to get two panel plot.
 
 point 3
 - tmax vs tmin - contour, bin, or hex plot would be better
