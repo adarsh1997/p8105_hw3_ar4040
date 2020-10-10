@@ -122,7 +122,8 @@ accel_df%>%
 group_by(day_id)%>%
 ggplot(aes(x = minute_of_day, y = activity_count, group = day_id, color = day))+
 geom_line(alpha = 0.5)+
-geom_smooth(aes(group = day))
+geom_smooth(aes(group = day))+
+labs(title = "24-hour activity time course", x = "The minute of the day", y = "Activity count measured by accelerometer")
 ```
 
 There is a clear spike in activity count in the early minutes of the 24 hour day and another smaller spike in activity count towards the end of the day. Perhaps the participants like exercising in the mornings and/or evenings. There is a lul in the middle hours of the day. 
@@ -182,7 +183,6 @@ When comparing the average max temperature between January and July, it is clear
 
 
 
-
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 
 First, let's make the tmax vs tmin plot for the full dataset
@@ -191,7 +191,8 @@ First, let's make the tmax vs tmin plot for the full dataset
 plot1_tmax_tmin = ny_noaa_df%>%
 na.omit()%>%
 ggplot(  aes(x = tmin, y = tmax) )+
-geom_hex()
+geom_hex()+
+labs(title = "Maximum temperature vs minimum temperature", x = "Minimum temperature (degrees C)", y = "Maximum temperature (degrees C)")
   
 ```
 
@@ -201,9 +202,12 @@ Second, let's make a plot showing the distribution of snowfall values greater th
 
 plot2_snowfall = ny_noaa_df%>%
 na.omit()%>%
+group_by(year)%>%
 filter(snow > 0 & snow < 100)%>%
-ggplot(  aes(x = year, y = snow) ) +
-geom_smooth()
+ggplot(  aes(x = year, y = snow, group = year) ) +
+geom_boxplot(aes(fill = year))+
+labs(title = "Snowfall distribution by year", x = "Year", y = "Snowfall in mm")
+  
 
 
 ```
