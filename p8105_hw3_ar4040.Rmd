@@ -13,7 +13,7 @@ Loading tidyverse library:
 library(tidyverse)
 library(p8105.datasets)
 library(hexbin)
-data("instacart")
+library(patchwork)
 ```
 
 
@@ -111,26 +111,23 @@ geom_line(alpha = 0.5)+
 geom_smooth(aes(group = day))
 ```
 
+NOTES:
 data wrangling - 
 1) go from wide format to long format - activity count, minute of the day
 2)straightforward
 3)useful names for activity count and minute
 4)mutate - weekday and weekend
 5)variable classes - num, char, factor (is order reasonable)
-
 point 2-
 - table with 35 day, total activity count for those days 
 - go with week number and number of days
 (group by and summarize)
 - what jumps out at you looking at the dataset
-
 point 3-
 geom_line() could be useful. Linked lines overlapping each other. 35 lines in the middle of the plot 
 aes(color = day of week)
-
 potential issues - 
 for the table, day of week would by default be in alphabetical order. May need to use factors to order it correctly 
-
 for tidying, is minute of day in numeric format or some other format? Make sure it is numeric. Later on, the plots need to show what you want to show and be in right order
 
 #Problem 3
@@ -176,7 +173,7 @@ group_by(id,year,month)%>%
 summarize(avg_tmax = mean(tmax))%>%
 ggplot(  aes(x = year, y = avg_tmax, group = id, color = id) ) +
 geom_point()+
-geom_smooth()+
+geom_path()+
 facet_grid(. ~  month)+
 labs(title = "Average maximum mean temperature for January and July across stations and years", x = "year", y = "average maximum temperature (degrees C)") +
 theme(legend.position = "none") 
@@ -195,11 +192,31 @@ geom_hex()
   
 ```
 
+Second, let's make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 
+```{r}
+
+plot2_snowfall = ny_noaa_df%>%
+na.omit()%>%
+filter(snow > 0 & snow < 100)%>%
+ggplot(  aes(x = year, y = snow) ) +
+geom_smooth()
+
+
+```
+
+
+Use patchwork to stitch the two plots togther into a 2-panel plot
+
+```{r}
+plot1_tmax_tmin + plot2_snowfall
+```
+
+
+NOTES:
 point 1
 - seperate year, month, and day. No need to convert month to descriptor 
 - snowfall units should be converted to good units. degrees C perhaps
-
 point 2 
 - data manipulation followed by plotting 
 - group by and summarize
@@ -209,7 +226,6 @@ point 2
 - use count to look at common snowball values
 - plot has lot of lines stacked up on each other.
 - Use facet to get two panel plot.
-
 point 3
 - tmax vs tmin - contour, bin, or hex plot would be better
 - second plot, filter by those values, use boxplot, ridgeplots et c to show distribution 
