@@ -91,6 +91,16 @@ mutate(
       TRUE      ~ ""
   ))
 ```
+Describe the dataset-
+
+Number of observations in accel_df
+```{r}
+nrow(accel_df)
+```
+
+
+The cleaned dataset now has 6 variables. The week number and day number which are both coded as doubles, the day of the week which is a character variable, the minute of day which represents each minute in a 24 hour day, stored as a character, the activity count which is the physical activity measured by the accelerometer stored as a double, and weekday_weekend which depicts whether the day of the week is a weekday or weekend stored as a character variable. The final dataset has 50400 observations. 
+
 
 Creating a table that aggregated activity count for each of the days 
 
@@ -101,6 +111,10 @@ summarize(total_activity_count = sum(activity_count, na.rm = FALSE))%>%
 knitr::kable()
   
 ```
+There don't appear to be any major trends with activity count by day, and most of the values appear to be relatively random. However, there is a significant drop in physical activity measured on day 2, day 24, and day 31. Perhaps the participants did not have time to exercise those days due to some other commitments. 
+
+
+
 Making a plot of 24 hour activity time courses for the different days.
 
 ```{r}
@@ -111,24 +125,8 @@ geom_line(alpha = 0.5)+
 geom_smooth(aes(group = day))
 ```
 
-NOTES:
-data wrangling - 
-1) go from wide format to long format - activity count, minute of the day
-2)straightforward
-3)useful names for activity count and minute
-4)mutate - weekday and weekend
-5)variable classes - num, char, factor (is order reasonable)
-point 2-
-- table with 35 day, total activity count for those days 
-- go with week number and number of days
-(group by and summarize)
-- what jumps out at you looking at the dataset
-point 3-
-geom_line() could be useful. Linked lines overlapping each other. 35 lines in the middle of the plot 
-aes(color = day of week)
-potential issues - 
-for the table, day of week would by default be in alphabetical order. May need to use factors to order it correctly 
-for tidying, is minute of day in numeric format or some other format? Make sure it is numeric. Later on, the plots need to show what you want to show and be in right order
+There is a clear spike in activity count in the early minutes of the 24 hour day and another smaller spike in activity count towards the end of the day. Perhaps the participants like exercising in the mornings and/or evenings. There is a lul in the middle hours of the day. 
+
 
 #Problem 3
 
@@ -151,7 +149,7 @@ mutate(prcp = as.numeric(prcp) / 10,
        tmax = as.numeric(tmax) / 10)
 ```
 
-the ny_noaa data has been cleaned such that the date has separated into year, month, and day. The temperatures have been converted to degrees celsius from tenths of degrees celsius and all of the precipitation and snowfall have been converted to mm units. 
+The ny_noaa data has been cleaned such that the date has separated into year, month, and day. The temperatures have been converted to degrees celsius from tenths of degrees celsius and all of the precipitation and snowfall have been converted to mm units. 
 
 Now to look at the most common values of snowfall
 
@@ -179,6 +177,11 @@ labs(title = "Average maximum mean temperature for January and July across stati
 theme(legend.position = "none") 
       
 ```
+
+When comparing the average max temperature between January and July, it is clear that the avergae max temperature is MUCH higher in July compared to January. Probably because summer temperatures are higher than winter temperatures. There don't appear to be any major outliers, but the average max temperature in the early 1980s and 1996 in Jan appear drastically low compared to the rest of the month and the same holds true for the late 1980s in July. Otherwise, the temperatures appear fairly consistent with only a little variability. 
+
+
+
 
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 
@@ -211,22 +214,4 @@ Use patchwork to stitch the two plots togther into a 2-panel plot
 ```{r}
 plot1_tmax_tmin + plot2_snowfall
 ```
-
-
-NOTES:
-point 1
-- seperate year, month, and day. No need to convert month to descriptor 
-- snowfall units should be converted to good units. degrees C perhaps
-point 2 
-- data manipulation followed by plotting 
-- group by and summarize
-- group by station, year, month
-- summarize to get average max temperature 
-- filter Jan and July (doesn't matter which order)
-- use count to look at common snowball values
-- plot has lot of lines stacked up on each other.
-- Use facet to get two panel plot.
-point 3
-- tmax vs tmin - contour, bin, or hex plot would be better
-- second plot, filter by those values, use boxplot, ridgeplots et c to show distribution 
 
